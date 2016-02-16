@@ -891,10 +891,8 @@ class AtomEnvironment extends Model
     @commands.dispatch(@contextMenu.activeElement, command, args)
 
   openLocations: (locations) ->
-    needsProjectPaths = @project?.getPaths().length is 0
-
     for {pathToOpen, initialLine, initialColumn} in locations
-      if pathToOpen? and needsProjectPaths
+      if pathToOpen?
         if fs.existsSync(pathToOpen)
           @project.addPath(pathToOpen)
         else if fs.existsSync(path.dirname(pathToOpen))

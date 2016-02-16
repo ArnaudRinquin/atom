@@ -273,6 +273,13 @@ describe "AtomEnvironment", ->
         atom.openLocations([{pathToOpen}])
         expect(atom.project.getPaths()[0]).toBe __dirname
 
+      describe "then another path is opened", ->
+        it "adds the other path to the project's paths", ->
+          secondPathToOpen = path.resolve(__dirname, '..')
+          atom.openLocations([{secondPathToOpen}])
+          expect(atom.project.getPaths()[0]).toBe __dirname
+          expect(atom.project.getPaths()[1]).toBe secondPathToOpen
+
     describe "when the opened path does not exist but its parent directory does", ->
       it "adds the parent directory to the project paths", ->
         pathToOpen = path.join(__dirname, 'this-path-does-not-exist.txt')

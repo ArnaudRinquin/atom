@@ -118,6 +118,7 @@ parseCommandLine = ->
   options.string('timeout').describe('timeout', 'When in test mode, waits until the specified time (in minutes) and kills the process (exit code: 130).')
   options.alias('v', 'version').boolean('v').describe('v', 'Print the version.')
   options.alias('w', 'wait').boolean('w').describe('w', 'Wait for window to be closed before returning.')
+  options.alias('a', 'append').boolean('a').describe('append', 'Open path as a new project in last used window.')
   options.string('socket-path')
 
   args = options.argv
@@ -130,6 +131,7 @@ parseCommandLine = ->
     process.stdout.write("#{version}\n")
     process.exit(0)
 
+  appendToLastWindow = args['append']
   executedFrom = args['executed-from']?.toString() ? process.cwd()
   devMode = args['dev']
   safeMode = args['safe']
@@ -164,6 +166,6 @@ parseCommandLine = ->
 
   {resourcePath, devResourcePath, pathsToOpen, urlsToOpen, executedFrom, test,
    version, pidToKillWhenClosed, devMode, safeMode, newWindow,
-   logFile, socketPath, profileStartup, timeout, setPortable}
+   logFile, socketPath, profileStartup, timeout, setPortable, appendToLastWindow}
 
 start()

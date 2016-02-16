@@ -89,16 +89,16 @@ class AtomApplication
     else
       @loadState(options) or @openPath(options)
 
-  openWithOptions: ({pathsToOpen, executedFrom, urlsToOpen, test, pidToKillWhenClosed, devMode, safeMode, newWindow, logFile, profileStartup, timeout}) ->
+  openWithOptions: ({pathsToOpen, executedFrom, urlsToOpen, test, pidToKillWhenClosed, devMode, safeMode, newWindow, logFile, profileStartup, timeout, appendToLastWindow}) ->
     if test
       @runTests({headless: true, devMode, @resourcePath, executedFrom, pathsToOpen, logFile, timeout})
     else if pathsToOpen.length > 0
-      @openPaths({pathsToOpen, executedFrom, pidToKillWhenClosed, newWindow, devMode, safeMode, profileStartup})
+      @openPaths({pathsToOpen, executedFrom, pidToKillWhenClosed, newWindow, devMode, safeMode, profileStartup, appendToLastWindow})
     else if urlsToOpen.length > 0
       @openUrl({urlToOpen, devMode, safeMode}) for urlToOpen in urlsToOpen
     else
       # Always open a editor window if this is the first instance of Atom.
-      @openPath({pidToKillWhenClosed, newWindow, devMode, safeMode, profileStartup})
+      @openPath({pidToKillWhenClosed, newWindow, devMode, safeMode, profileStartup, appendToLastWindow})
 
   # Public: Removes the {AtomWindow} from the global window list.
   removeWindow: (window) ->
@@ -387,8 +387,9 @@ class AtomApplication
   #   :safeMode - Boolean to control the opened window's safe mode.
   #   :profileStartup - Boolean to control creating a profile of the startup time.
   #   :window - {AtomWindow} to open file paths in.
-  openPath: ({pathToOpen, pidToKillWhenClosed, newWindow, devMode, safeMode, profileStartup, window} = {}) ->
-    @openPaths({pathsToOpen: [pathToOpen], pidToKillWhenClosed, newWindow, devMode, safeMode, profileStartup, window})
+  #   :appendToLastWindow - Boolean of whether this should be opened in last focused window.
+  openPath: ({pathToOpen, pidToKillWhenClosed, newWindow, devMode, safeMode, profileStartup, window, appendToLastWindow} = {}) ->
+    @openPaths({pathsToOpen: [pathToOpen], pidToKillWhenClosed, newWindow, devMode, safeMode, profileStartup, window, appendToLastWindow})
 
   # Public: Opens multiple paths, in existing windows if possible.
   #
@@ -400,7 +401,8 @@ class AtomApplication
   #   :safeMode - Boolean to control the opened window's safe mode.
   #   :windowDimensions - Object with height and width keys.
   #   :window - {AtomWindow} to open file paths in.
-  openPaths: ({pathsToOpen, executedFrom, pidToKillWhenClosed, newWindow, devMode, safeMode, windowDimensions, profileStartup, window}={}) ->
+  #   :appendToLastWindow - Boolean of whether this should be opened in last focused window.
+  openPaths: ({pathsToOpen, executedFrom, pidToKillWhenClosed, newWindow, devMode, safeMode, windowDimensions, profileStartup, window, appendToLastWindow}={}) ->
     devMode = Boolean(devMode)
     safeMode = Boolean(safeMode)
     locationsToOpen = (@locationForPathToOpen(pathToOpen, executedFrom) for pathToOpen in pathsToOpen)
@@ -412,6 +414,7 @@ class AtomApplication
       unless existingWindow?
         if currentWindow = window ? @lastFocusedWindow
           existingWindow = currentWindow if (
+            appendToLastWindow or
             currentWindow.devMode is devMode and
             (
               stats.every((stat) -> stat.isFile?()) or
